@@ -1,0 +1,25 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  width: 940px;
+  margin: auto;
+}
+
+a {
+  color: #00b7ff;
+}
+
+.product {
+  margin: 20px auto;
+}
+
+input {
+  display: block;
+  margin: 5px;
+  width: 200px;
+}
+
+button {
+  border: 1px solid #eee;
+  padding: 10px 20px;
+}

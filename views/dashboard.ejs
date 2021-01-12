@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <header>
+      <h3>User Email : <%= email %></h3>
+      <a href="/logout"><button>Logout</button></a>
+    </header>
+    <div>
+      <h2>Add a product</h2>
+      <label for="name">Product Name </label>
+      <input type="text" name="name" id="name" required />
+      <label for="type">Product Type </label>
+      <input type="text" name="type" id="type" required />
+      <label for="size">Product Size</label>
+      <input type="text" name="size" id="size" required />
+      <label for="quantity">Product Quantity</label>
+      <input type="number" name="quantity" id="quantity" required />
+      <label for="color">Product Color</label>
+      <input type="text" name="color" id="color" required />
+      <button onclick="addProduct()">Add</button>
+    </div>
+    <div>
+      <h2>Products</h2>
+      <div id="products-div"></div>
+    </div>
+  </body>
+  <script>
+    function addProduct() {
+      const name = document.getElementById("name");
+      const type = document.getElementById("type");
+      const size = document.getElementById("size");
+      const quantity = document.getElementById("quantity");
+      const color = document.getElementById("color");
+      if (
+        !name.value ||
+        !type.value ||
+        !size.value ||
+        !quantity.value ||
+        !color.value
+      ) {
+        alert("All fields are required");
+        return;
+      }
+      fetch("/products", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.value,
+          type: type.value,
+          size: size.value,
+          quantity: quantity.value,
+          color: color.value,
+        }),
+      }).then((res) => {
+        name.value = "";
+        type.value = "";
+        size.value = "";
+        quantity.value = "";
+        color.value = "";
+        fetchProducts();
+      });
+    }
+    function fetchProducts() {
+      let productDiv = document.getElementById("products-div");
+      productDiv.innerHTML = "";
+      fetch("/products")
+        .then((res) => res.json())
+        .then((data) => {
+          let products = data.products;
+          products.forEach((product) => {
+            productDiv.innerHTML += `<div class='product'>
+            <label for="name">Product Name </label>
+            <input type="text" name="name" id="${product._id}_name" value='${product.name}' required/>
+            <label for="type">Product Type </label>
+            <input type="text" name="type" id="${product._id}_type" value='${product.type}' required/>
+            <label for="size">Product Size</label>
+            <input type="text" name="size" id="${product._id}_size" value='${product.size}' required/>
+            <label for="quantity">Product Quantity</label>
+            <input type="number" name="quantity" id="${product._id}_quantity" value='${product.quantity}' required/>
+            <label for="color">Product Color</label>
+            <input type="text" name="color" id="${product._id}_color" value='${product.color}' required/>
+            <button id='${product._id}_update' onclick="updateProduct('${product._id}')">Update Product</button>
+            <button id='${product._id}_delete' onclick="deleteProduct('${product._id}')">Delete Product</button>
+            </div>`;
+          });
+        });
+    }
+    function updateProduct(id) {
+      const updateButton = document.getElementById(id + "_update");
+      updateButton.disabled = true;
+      const name = document.getElementById(id + "_name").value;
+      const type = document.getElementById(id + "_type").value;
+      const size = document.getElementById(id + "_size").value;
+      const quantity = document.getElementById(id + "_quantity").value;
+      const color = document.getElementById(id + "_color").value;
+
+      fetch("/products", {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          name,
+          type,
+          size,
+          quantity,
+          color,
+        }),
+      })
+        .then((res) => {
+          updateButton.disabled = false;
+          fetchProducts();
+        })
+        .catch((err) => {
+          console.log("Error while updating product");
+        });
+    }
+    function deleteProduct(id) {
+      const deleteButton = document.getElementById(id + "_delete");
+      deleteButton.disabled = true;
+      fetch("products", {
+        method: "delete",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      })
+        .then((res) => {
+          fetchProducts();
+        })
+        .catch((err) => {
+          console.log("Error occured while deleting product");
+        });
+    }
+    fetchProducts();
+  </script>
+</html>
